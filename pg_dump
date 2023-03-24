@@ -1,0 +1,237 @@
+Pg_dump
+
+Task: Take dump of PSQL DATABASE  and Restore in another database of postgres.
+
+Steps: 
+
+Create a directory with the name of pgdata using the below command.
+ 	mkdir pgdata
+
+First I created a container for postgresql using the below command.
+
+podman run --name postgres -e POSTGRES_PASSWORD=redhat -v /home/supreme/pgdata:/var/lib/postgresql/data -p 5432:5432 -d postgres
+
+To enter inside the PostgreSQL database you can use the below command.
+ podman exec -it postgres psql -U postgres
+
+Create a new database Using below command.
+postgres=# CREATE DATABASE postman;
+ 	CREATE DATABASE
+
+Use \l for seeing List of databases
+
+postgres=# \l
+                                               List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |   Access privileges   
+-----------+----------+----------+------------+------------+------------+-----------------+-----------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ postman   | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +
+           |          |          |            |            |            |                 | postgres=CTc/postgres
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +
+           |          |          |            |            |            |                 | postgres=CTc/postgres
+
+
+Use \c database name to enter inside the database.
+
+postgres=# \c postman
+You are now connected to database "postman" as user "postgres".
+
+Create a table with the name of employees using below command
+postman=# CREATE TABLE employees (  id SERIAL PRIMARY KEY,  name VARCHAR(50),  email VARCHAR(50), salary DECIMAL(10,2));
+CREATE TABLE
+
+Insert data inside the table 
+postman=# INSERT INTO employees (name, email, salary) VALUES  ('rashi khitoliya', 'rashi.khati@gmail.com', 50000.00), ('komal khitoliya', 'komal.khati@gmail.com', 60000.00), ('krish dhaiya', 'krish.dhaiya@gmail.com', 55000.00), ('rahul singh', 'rahul.singh@gmail.com', 65000.00), ('rohit', 'rohit.keenable@gmail.com.com', 70000.00);
+INSERT 0 5
+
+Check your table using the below command.
+
+postman=# SELECT * FROM employees;
+
+ id |  	name   	|        	email         	|  salary  
+----+-----------------+------------------------------+----------
+  1 | rashi khitoliya | rashi.khati@gmail.com    	| 50000.00
+  2 | komal khitoliya | komal.khati@gmail.com    	| 60000.00
+  3 | krish dhaiya	| krish.dhaiya@gmail.com   	| 55000.00
+  4 | rahul singh 	| rahul.singh@gmail.com    	| 65000.00
+  5 | rohit       	| rohit.keenable@gmail.com.com | 70000.00
+(5 rows)
+
+
+
+
+Use the below command for seeing the table you created.
+postman=# SELECT * FROM employees;
+ id |      name       |            email             |  salary  
+----+-----------------+------------------------------+----------
+  1 | rashi khitoliya | rashi.khati@gmail.com        | 50000.00
+  2 | komal khitoliya | komal.khati@gmail.com        | 60000.00
+  3 | krish dhaiya    | krish.dhaiya@gmail.com       | 55000.00
+  4 | rahul singh     | rahul.singh@gmail.com        | 65000.00
+  5 | rohit           | rohit.keenable@gmail.com.com | 70000.00
+(5 rows)
+Created another table with the name of customers using the below command.
+postman=# CREATE TABLE customers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE
+);
+CREATE TABLE
+
+postman=# insert into customers (name, email) values ('rohit', 'rohitnegi12@gmail.com'), ('pawan', 'pawanhaddi@gmail.com');
+INSERT 0 2
+
+Check your table using the below command.
+
+postman=# select * from customers;
+ id | name  |         email         
+----+-------+-----------------------
+  1 | rohit | rohitnegi12@gmail.com
+  2 | pawan | pawanhaddi@gmail.com
+(2 rows)
+
+Install  postgresql-client version 
+  sudo apt install postgresql-client-15
+
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+postgresql-client-15 is already the newest version (15.2-1.pgdg22.04+1).
+0 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+
+
+Check the size of the database using(  \l+ ) this command shows you a list of databases with the size of databases.
+supreme@supreme:/tmp$ podman exec -it postgres psql -U postgres
+
+postgres=# \l+
+                                                                                  List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |   Access privileges   |  Size   | Tablespace |    
+            Description                 
+-----------+----------+----------+------------+------------+------------+-----------------+-----------------------+---------+------------+----
+----------------------------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            |                       | 7453 kB | pg_default | def
+ault administrative connection database
+ postman   | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            |                       | 7661 kB | pg_default | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +| 7297 kB | pg_default | unm
+odifiable empty database
+           |          |          |            |            |            |                 | postgres=CTc/postgres |         |            | 
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +| 7525 kB | pg_default | def
+ault template for new databases
+           |          |          |            |            |            |                 | postgres=CTc/postgres |         |            | 
+(4 rows)
+
+
+
+Take the pg-dump of the postgres database using the below command.
+
+supreme@supreme:~$ pg_dump -U postgres -h localhost -p 5432 -F c -b -v -f /tmp/postman.backup postman
+supreme@supreme:~$ cd /tmp/
+
+supreme@supreme:/tmp$ ls
+prwxrwxrwx 1 root    root       0 Mar 15 15:20 ad_mailbox_866_0_11_evt_subevt_0
+prwxrwxrwx 1 root    root       0 Mar 15 15:20 ad_mailbox_866_0_10_evt_subevt_0
+prwxrwxrwx 1 supreme supreme    0 Mar 16 15:58 ad_mailbox_2970_0_0_evt_subevt_0
+prwxrwxrwx 1 supreme supreme    0 Mar 16 15:58 ad_mailbox_11463_0_1_evt_subevt_0
+prwxrwxrwx 1 supreme supreme    0 Mar 16 15:58 ad_mailbox_11463_0_0_evt_subevt_0
+prwxrwxrwx 1 supreme supreme    0 Mar 16 15:58 ad_mailbox_11388_0_1_evt_subevt_0
+-rw-rw-r-- 1 supreme supreme 5.2K Mar 16 17:29 postman.backup
+prwxrwxrwx 1 supreme supreme    0 Mar 16 17:30 ad_mailbox_11388_0_0_evt_subevt_0
+
+
+
+Create an empty database .
+postgres=# create database yogi;
+CREATE DATABASE
+Now restore the data in our New database using the below command.
+supreme@supreme:/tmp$ pg_restore --verbose --clean --no-acl --no-owner -h localhost  -U postgres -d yogi /tmp/postman.backup
+pg_restore: connecting to database for restore
+Password: 
+pg_restore: dropping CONSTRAINT employees employees_pkey
+pg_restore: while PROCESSING TOC:
+pg_restore: from TOC entry 3184; 2606 16395 CONSTRAINT employees employees_pkey postgres
+pg_restore: error: could not execute query: ERROR:  relation "public.employees" does not exist
+Command was: ALTER TABLE ONLY public.employees DROP CONSTRAINT employees_pkey;
+pg_restore: dropping CONSTRAINT customers customers_pkey
+pg_restore: from TOC entry 3188; 2606 16411 CONSTRAINT customers customers_pkey postgres
+pg_restore: error: could not execute query: ERROR:  relation "public.customers" does not exist
+Command was: ALTER TABLE ONLY public.customers DROP CONSTRAINT customers_pkey;
+pg_restore: dropping CONSTRAINT customers customers_email_key
+pg_restore: from TOC entry 3186; 2606 16413 CONSTRAINT customers customers_email_key postgres
+pg_restore: error: could not execute query: ERROR:  relation "public.customers" does not exist
+Command was: ALTER TABLE ONLY public.customers DROP CONSTRAINT customers_email_key;
+pg_restore: dropping DEFAULT employees id
+pg_restore: from TOC entry 3181; 2604 16393 DEFAULT employees id postgres
+pg_restore: error: could not execute query: ERROR:  relation "public.employees" does not exist
+Command was: ALTER TABLE public.employees ALTER COLUMN id DROP DEFAULT;
+pg_restore: dropping DEFAULT customers id
+pg_restore: from TOC entry 3182; 2604 16407 DEFAULT customers id postgres
+pg_restore: error: could not execute query: ERROR:  relation "public.customers" does not exist
+Command was: ALTER TABLE public.customers ALTER COLUMN id DROP DEFAULT;
+pg_restore: dropping SEQUENCE employees_id_seq
+pg_restore: from TOC entry 214; 1259 16389 SEQUENCE employees_id_seq postgres
+pg_restore: error: could not execute query: ERROR:  sequence "employees_id_seq" does not exist
+Command was: DROP SEQUENCE public.employees_id_seq;
+pg_restore: dropping TABLE employees
+pg_restore: from TOC entry 215; 1259 16390 TABLE employees postgres
+pg_restore: error: could not execute query: ERROR:  table "employees" does not exist
+Command was: DROP TABLE public.employees;
+pg_restore: dropping SEQUENCE customers_id_seq
+pg_restore: from TOC entry 216; 1259 16403 SEQUENCE customers_id_seq postgres
+pg_restore: error: could not execute query: ERROR:  sequence "customers_id_seq" does not exist
+Command was: DROP SEQUENCE public.customers_id_seq;
+pg_restore: dropping TABLE customers
+pg_restore: from TOC entry 217; 1259 16404 TABLE customers postgres
+pg_restore: error: could not execute query: ERROR:  table "customers" does not exist
+Command was: DROP TABLE public.customers;
+pg_restore: creating TABLE "public.customers"
+pg_restore: creating SEQUENCE "public.customers_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.customers_id_seq"
+pg_restore: creating TABLE "public.employees"
+pg_restore: creating SEQUENCE "public.employees_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.employees_id_seq"
+pg_restore: creating DEFAULT "public.customers id"
+pg_restore: creating DEFAULT "public.employees id"
+pg_restore: processing data for table "public.customers"
+pg_restore: processing data for table "public.employees"
+pg_restore: executing SEQUENCE SET customers_id_seq
+pg_restore: executing SEQUENCE SET employees_id_seq
+pg_restore: creating CONSTRAINT "public.customers customers_email_key"
+pg_restore: creating CONSTRAINT "public.customers customers_pkey"
+pg_restore: creating CONSTRAINT "public.employees employees_pkey"
+pg_restore: warning: errors ignored on restore: 9
+
+Now check the size of the new database yogi  if the size matches our previous database that means dump is correct.
+supreme@supreme:/tmp$ podman exec -it postgres psql -U postgres
+psql (15.2 (Debian 15.2-1.pgdg110+1))
+Type "help" for help.
+
+postgres=# \l+
+                                                                                  List of databases
+   Name    |  Owner   | Encoding |  Collate   |   Ctype    | ICU Locale | Locale Provider |   Access privileges   |  Size   | Tablespace |    
+            Description                 
+-----------+----------+----------+------------+------------+------------+-----------------+-----------------------+---------+------------+----
+----------------------------------------
+ postgres  | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            |                       | 7453 kB | pg_default | def
+ault administrative connection database
+ postman   | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            |                       | 7661 kB | pg_default | 
+ template0 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +| 7297 kB | pg_default | unm
+odifiable empty database
+           |          |          |            |            |            |                 | postgres=CTc/postgres |         |            | 
+ template1 | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            | =c/postgres          +| 7525 kB | pg_default | def
+ault template for new databases
+           |          |          |            |            |            |                 | postgres=CTc/postgres |         |            | 
+ yogi      | postgres | UTF8     | en_US.utf8 | en_US.utf8 |            | libc            |                       | 7661 kB | pg_default | 
+(5 rows)
+
+( Size is matched )
+
+
+
+
+
+
+
+
+	
+
