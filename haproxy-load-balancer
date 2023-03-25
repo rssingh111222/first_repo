@@ -1,0 +1,66 @@
+HAPROXY IN PODMAN
+
+
+sudo apt-get update
+sudo apt-get upgrade 
+
+sudo apt-get install podman
+
+podman --version
+ 
+rohit@rohit:~/haproxy$ podman run -itd --name httpd2 -p 8081:80 docker.io/library/httpd
+
+rohit@rohit:~/haproxy$ podman run -itd --name httpd2 -p 8081:80 docker.io/library/httpd
+
+podman ps
+
+curl localhost:8080
+<html><body><h1>It works!</h1></body></html>
+
+curl localhost:8081
+<html><body><h1>It works!</h1></body></html>
+
+mkdir haproxy
+
+cd haproxy/
+
+touch haproxy.cfg
+
+rohit@rohit:~/haproxy$ podman run -itd --name haproxy1 -p 8085:8085 -v /home/rohit/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg docker.io/library/haproxy
+
+vim /home/rohit/haproxy/haproxy.cfg
+
+global
+  daemon
+  log 127.0.0.1 local0
+  log 127.0.0.1 local1 notice
+  maxconn 4096
+  tune.ssl.default-dh-param 2048
+
+defaults
+  log               global
+  retries           3
+  maxconn           2000
+  timeout connect   5s
+  timeout client    50s
+  timeout server    50s
+
+
+frontend main
+        bind *:8085
+        default_backend tomcat-server
+#        option http-server-close
+#        option forwardfor
+#        stats uri /haproxy?stats
+
+backend tomcat-server
+        balance roundrobin
+#        mode http
+        server tomcat1 192.168.1.122:8080 check
+        server tomcat2 192.168.1.122:8081 check
+        
+        
+curl localhost:8085
+<html><body><h1>It works!</h1></body></html>
+
+       
